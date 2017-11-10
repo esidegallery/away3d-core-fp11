@@ -5,7 +5,7 @@ package away3d.animators
 	import flash.geom.Vector3D;
 	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
-	
+
 	import away3d.arcane;
 	import away3d.animators.nodes.AnimationNodeBase;
 	import away3d.animators.states.AnimationStateBase;
@@ -15,30 +15,30 @@ package away3d.animators
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.IAsset;
 	import away3d.library.assets.NamedAssetBase;
-	
+
 	use namespace arcane;
-	
+
 	/**
 	 * Dispatched when playback of an animation inside the animator object starts.
 	 *
 	 * @eventType away3d.events.AnimatorEvent
 	 */
 	[Event(name="start", type="away3d.events.AnimatorEvent")]
-	
+
 	/**
 	 * Dispatched when playback of an animation inside the animator object stops.
 	 *
 	 * @eventType away3d.events.AnimatorEvent
 	 */
 	[Event(name="stop", type="away3d.events.AnimatorEvent")]
-	
+
 	/**
 	 * Dispatched when playback of an animation reaches the end of an animation.
 	 *
 	 * @eventType away3d.events.AnimatorEvent
 	 */
 	[Event(name="cycle_complete", type="away3d.events.AnimatorEvent")]
-	
+
 	/**
 	 * Provides an abstract base class for animator classes that control animation output from a data set subtype of <code>AnimationSetBase</code>.
 	 *
@@ -54,7 +54,7 @@ package away3d.animators
 		private var _cycleEvent:AnimatorEvent;
 		private var _time:int;
 		private var _playbackSpeed:Number = 1;
-		
+
 		protected var _animationSet:IAnimationSet;
 		protected var _owners:Vector.<Mesh> = new Vector.<Mesh>();
 		protected var _activeNode:AnimationNodeBase;
@@ -62,26 +62,26 @@ package away3d.animators
 		protected var _activeAnimationName:String;
 		protected var _absoluteTime:Number = 0;
 		private var _animationStates:Dictionary = new Dictionary(true);
-		
+
 		/**
 		 * Enables translation of the animated mesh from data returned per frame via the positionDelta property of the active animation node. Defaults to true.
 		 *
 		 * @see away3d.animators.states.IAnimationState#positionDelta
 		 */
 		public var updatePosition:Boolean = true;
-		
+
 		public function getAnimationState(node:AnimationNodeBase):AnimationStateBase
 		{
 			var className:Class = node.stateClass;
-			
+
 			return _animationStates[node] ||= new className(this, node);
 		}
-		
+
 		public function getAnimationStateByName(name:String):AnimationStateBase
 		{
 			return getAnimationState(_animationSet.getAnimation(name));
 		}
-		
+
 		/**
 		 * Returns the internal absolute time of the animator, calculated by the current time and the playback speed.
 		 *
@@ -92,7 +92,7 @@ package away3d.animators
 		{
 			return _absoluteTime;
 		}
-		
+
 		/**
 		 * Returns the animation data set in use by the animator.
 		 */
@@ -100,7 +100,7 @@ package away3d.animators
 		{
 			return _animationSet;
 		}
-		
+
 		/**
 		 * Returns the current active animation state.
 		 */
@@ -108,7 +108,7 @@ package away3d.animators
 		{
 			return _activeState;
 		}
-		
+
 		/**
 		 * Returns the current active animation node.
 		 */
@@ -116,7 +116,7 @@ package away3d.animators
 		{
 			return _animationSet.getAnimation(_activeAnimationName);
 		}
-		
+
 		/**
 		 * Returns the current active animation node.
 		 */
@@ -124,7 +124,7 @@ package away3d.animators
 		{
 			return _activeAnimationName;
 		}
-		
+
 		/**
 		 * Determines whether the animators internal update mechanisms are active. Used in cases
 		 * where manual updates are required either via the <code>time</code> property or <code>update()</code> method.
@@ -137,20 +137,20 @@ package away3d.animators
 		{
 			return _autoUpdate;
 		}
-		
+
 		public function set autoUpdate(value:Boolean):void
 		{
 			if (_autoUpdate == value)
 				return;
-			
+
 			_autoUpdate = value;
-			
+
 			if (_autoUpdate)
 				start();
 			else
 				stop();
 		}
-		
+
 		/**
 		 * Gets and sets the internal time clock of the animator.
 		 */
@@ -158,15 +158,15 @@ package away3d.animators
 		{
 			return _time;
 		}
-		
+
 		public function set time(value:int):void
 		{
 			if (_time == value)
 				return;
-			
+
 			update(value);
 		}
-		
+
 		/**
 		 * Sets the animation phase of the current active state's animation clip(s).
 		 *
@@ -176,7 +176,7 @@ package away3d.animators
 		{
 			_activeState.phase(value);
 		}
-		
+
 		/**
 		 * Creates a new <code>AnimatorBase</code> object.
 		 *
@@ -186,7 +186,7 @@ package away3d.animators
 		{
 			_animationSet = animationSet;
 		}
-		
+
 		/**
 		 * The amount by which passed time should be scaled. Used to slow down or speed up animations. Defaults to 1.
 		 */
@@ -194,12 +194,12 @@ package away3d.animators
 		{
 			return _playbackSpeed;
 		}
-		
+
 		public function set playbackSpeed(value:Number):void
 		{
 			_playbackSpeed = value;
 		}
-		
+
 		/**
 		 * Resumes the automatic playback clock controling the active state of the animator.
 		 */
@@ -207,20 +207,20 @@ package away3d.animators
 		{
 			if (_isPlaying || !_autoUpdate)
 				return;
-			
+
 			_time = _absoluteTime = getTimer();
-			
+
 			_isPlaying = true;
-			
+
 			if (!_broadcaster.hasEventListener(Event.ENTER_FRAME))
 				_broadcaster.addEventListener(Event.ENTER_FRAME, onEnterFrame);
-			
+
 			if (!hasEventListener(AnimatorEvent.START))
 				return;
-			
+
 			dispatchEvent(_startEvent ||= new AnimatorEvent(AnimatorEvent.START, this));
 		}
-		
+
 		/**
 		 * Pauses the automatic playback clock of the animator, in case manual updates are required via the
 		 * <code>time</code> property or <code>update()</code> method.
@@ -232,18 +232,18 @@ package away3d.animators
 		{
 			if (!_isPlaying)
 				return;
-			
+
 			_isPlaying = false;
-			
+
 			if (_broadcaster.hasEventListener(Event.ENTER_FRAME))
 				_broadcaster.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
-			
+
 			if (!hasEventListener(AnimatorEvent.STOP))
 				return;
-			
+
 			dispatchEvent(_stopEvent || (_stopEvent = new AnimatorEvent(AnimatorEvent.STOP, this)));
 		}
-		
+
 		/**
 		 * Provides a way to manually update the active state of the animator when automatic
 		 * updates are disabled.
@@ -254,17 +254,17 @@ package away3d.animators
 		public function update(time:int):void
 		{
 			var dt:Number = (time - _time)*playbackSpeed;
-			
+
 			updateDeltaTime(dt);
-			
+
 			_time = time;
 		}
-		
+
 		public function reset(name:String, offset:Number = 0):void
 		{
 			getAnimationState(_animationSet.getAnimation(name)).offset(offset + _absoluteTime);
 		}
-		
+
 		/**
 		 * Used by the mesh object to which the animator is applied, registers the owner for internal use.
 		 *
@@ -274,7 +274,7 @@ package away3d.animators
 		{
 			_owners.push(mesh);
 		}
-		
+
 		/**
 		 * Used by the mesh object from which the animator is removed, unregisters the owner for internal use.
 		 *
@@ -284,7 +284,7 @@ package away3d.animators
 		{
 			_owners.splice(_owners.indexOf(mesh), 1);
 		}
-		
+
 		/**
 		 * Internal abstract method called when the time delta property of the animator's contents requires updating.
 		 *
@@ -293,13 +293,13 @@ package away3d.animators
 		protected function updateDeltaTime(dt:Number):void
 		{
 			_absoluteTime += dt;
-			
+
 			_activeState.update(_absoluteTime);
-			
+
 			if (updatePosition)
 				applyPositionDelta();
 		}
-		
+
 		/**
 		 * Enter frame event handler for automatically updating the active state of the animator.
 		 */
@@ -307,7 +307,7 @@ package away3d.animators
 		{
 			update(getTimer());
 		}
-		
+
 		private function applyPositionDelta():void
 		{
 			var delta:Vector3D = _activeState.positionDelta;
@@ -319,9 +319,9 @@ package away3d.animators
 					_owners[i].translateLocal(delta, dist);
 			}
 		}
-		
+
 		/**
-		 *  for internal use.
+		 *	for internal use.
 		 *
 		 * @private
 		 */
@@ -330,14 +330,38 @@ package away3d.animators
 			if (hasEventListener(AnimatorEvent.CYCLE_COMPLETE))
 				dispatchEvent(_cycleEvent || (_cycleEvent = new AnimatorEvent(AnimatorEvent.CYCLE_COMPLETE, this)));
 		}
-		
+
+		// >>>>>>>>>>>> Added by nico
+		public var _eventFrameCbs:Object = {};
+		public function frameCallback(currentFrame:uint):void {
+			if(_eventFrameCbs[currentFrame]) {
+				do { _eventFrameCbs[currentFrame].shift()() } while(_eventFrameCbs[currentFrame].length > 0);
+				_eventFrameCbs[currentFrame] = null;
+			}
+		}
+		public function addFrameCallback(frame:uint, cb:Function):void {
+			_eventFrameCbs[frame] = _eventFrameCbs[frame] || new <Function>[];
+			_eventFrameCbs[frame].push(cb);
+		}
+
+		public var _animationCallbacks:Vector.<Function> = new <Function>[];
+		public function animationCallback():void {
+			while(_animationCallbacks.length > 0) { _animationCallbacks.shift()() }
+		}
+		public function addAnimationCallback(cb:Function):void {
+			_animationCallbacks.push(cb);
+		}
+
+		// <<<<<<<<<<<
+
+
 		/**
 		 * @inheritDoc
 		 */
 		public function dispose():void
 		{
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
