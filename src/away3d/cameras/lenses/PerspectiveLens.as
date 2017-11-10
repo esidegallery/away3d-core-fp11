@@ -1,9 +1,9 @@
 package away3d.cameras.lenses
 {
 	import away3d.core.math.*;
-	
+
 	import flash.geom.*;
-	
+
 	/**
 	 * The PerspectiveLens object provides a projection matrix that projects 3D geometry with perspective distortion.
 	 */
@@ -21,14 +21,14 @@ package away3d.cameras.lenses
 		 *
 		 * @param fieldOfView The vertical field of view of the projection.
 		 */
-		public function PerspectiveLens(fieldOfView:Number = 60, coordinateSystem:uint = 0)
+		public function PerspectiveLens(fieldOfView:Number = 60, coordinateSystem:uint = CoordinateSystem.LEFT_HANDED)
 		{
 			super();
-			
+
 			this.fieldOfView = fieldOfView;
 			this.coordinateSystem = coordinateSystem;
 		}
-		
+
 		/**
 		 * The vertical field of view of the projection in degrees.
 		 */
@@ -36,20 +36,20 @@ package away3d.cameras.lenses
 		{
 			return _fieldOfView;
 		}
-		
+
 		public function set fieldOfView(value:Number):void
 		{
 			if (value == _fieldOfView)
 				return;
-			
+
 			_fieldOfView = value;
-			
+
 			_focalLengthInv = Math.tan(_fieldOfView*Math.PI/360);
 			_focalLength = 1/_focalLengthInv;
-			
+
 			invalidateMatrix();
 		}
-		
+
 		/**
 		 * The focal length of the projection in units of viewport height.
 		 */
@@ -57,20 +57,20 @@ package away3d.cameras.lenses
 		{
 			return _focalLength;
 		}
-		
+
 		public function set focalLength(value:Number):void
 		{
 			if (value == _focalLength)
 				return;
-			
+
 			_focalLength = value;
-			
+
 			_focalLengthInv = 1/_focalLength;
 			_fieldOfView = Math.atan(_focalLengthInv)*360/Math.PI;
-			
+
 			invalidateMatrix();
 		}
-		
+
 		/**
 		 * Calculates the scene position relative to the camera of the given normalized coordinates in screen space.
 		 *
@@ -90,15 +90,15 @@ package away3d.cameras.lenses
 
 			v.x *= sZ;
 			v.y *= sZ;
-			
+
 			Matrix3DUtils.transformVector(unprojectionMatrix, v, v);
-			
+
 			//z is unaffected by transform
 			v.z = sZ;
-			
+
 			return v;
 		}
-		
+
 		override public function clone():LensBase
 		{
 			var clone:PerspectiveLens = new PerspectiveLens(_fieldOfView);
@@ -108,7 +108,7 @@ package away3d.cameras.lenses
 			clone._coordinateSystem = _coordinateSystem;
 			return clone;
 		}
-		
+
 		/**
 		 * The handedness of the coordinate system projection. The default is LEFT_HANDED.
 		 */
@@ -121,24 +121,24 @@ package away3d.cameras.lenses
 		{
 			if (value == _coordinateSystem)
 				return;
-			
+
 			_coordinateSystem = value;
-			
+
 			invalidateMatrix();
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
 		override protected function updateMatrix():void
 		{
 			var raw:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
-			
+
 			_yMax = _near*_focalLengthInv;
 			_xMax = _yMax*_aspectRatio;
-			
+
 			var left:Number, right:Number, top:Number, bottom:Number;
-			
+
 			if (_scissorRect.x == 0 && _scissorRect.y == 0 && _scissorRect.width == _viewPort.width && _scissorRect.height == _viewPort.height) {
 				// assume unscissored frustum
 				left = -_xMax;
@@ -160,12 +160,12 @@ package away3d.cameras.lenses
 				var yHgt:Number = _yMax*(_viewPort.height/_scissorRect.height);
 				var center:Number = _xMax*(_scissorRect.x*2 - _viewPort.width)/_scissorRect.width + _xMax;
 				var middle:Number = -_yMax*(_scissorRect.y*2 - _viewPort.height)/_scissorRect.height - _yMax;
-				
+
 				left = center - xWidth;
 				right = center + xWidth;
 				top = middle - yHgt;
 				bottom = middle + yHgt;
-				
+
 				raw[uint(0)] = 2*_near/(right - left);
 				raw[uint(5)] = 2*_near/(bottom - top);
 				raw[uint(8)] = (right + left)/(right - left);
@@ -182,23 +182,23 @@ package away3d.cameras.lenses
 				raw[uint(5)] = -raw[uint(5)];
 
 			_matrix.copyRawDataFrom(raw);
-			
+
 			var yMaxFar:Number = _far*_focalLengthInv;
 			var xMaxFar:Number = yMaxFar*_aspectRatio;
-			
+
 			_frustumCorners[0] = _frustumCorners[9] = left;
 			_frustumCorners[3] = _frustumCorners[6] = right;
 			_frustumCorners[1] = _frustumCorners[4] = top;
 			_frustumCorners[7] = _frustumCorners[10] = bottom;
-			
+
 			_frustumCorners[12] = _frustumCorners[21] = -xMaxFar;
 			_frustumCorners[15] = _frustumCorners[18] = xMaxFar;
 			_frustumCorners[13] = _frustumCorners[16] = -yMaxFar;
 			_frustumCorners[19] = _frustumCorners[22] = yMaxFar;
-			
+
 			_frustumCorners[2] = _frustumCorners[5] = _frustumCorners[8] = _frustumCorners[11] = _near;
 			_frustumCorners[14] = _frustumCorners[17] = _frustumCorners[20] = _frustumCorners[23] = _far;
-			
+
 			_matrixInvalid = false;
 		}
 	}

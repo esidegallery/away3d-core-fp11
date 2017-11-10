@@ -96,7 +96,7 @@
 		override protected function updateSceneTransform():void
 		{
 			super.updateSceneTransform();
-			sceneTransform.copyColumnTo(2, _sceneDirection);
+			_sceneTransform.copyColumnTo(2, _sceneDirection);
 			_sceneDirection.normalize();
 		}
 		
