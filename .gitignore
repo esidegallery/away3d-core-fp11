@@ -4,6 +4,7 @@ bin-debug/
 bin-release/
 out/
 target/
+build/
 
 # Project property files
 .actionScriptProperties
@@ -13,3 +14,8 @@ target/
 .project
 .DS_Store
 *.iml
+*.swo
+*.swp
+*.swn
+*.swm
+Session.vim
