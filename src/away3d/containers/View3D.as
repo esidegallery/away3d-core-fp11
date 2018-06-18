@@ -857,8 +857,8 @@
 		{
 			var v:Vector3D = _camera.project(point3d);
 
-			v.x = (v.x + 1.0)*_globalWidth/2.0;
-			v.y = (v.y + 1.0)*_globalHeight/2.0;
+			v.x = (v.x + 1.0) * (_globalWidth/2.0 + x);
+			v.y = (v.y + 1.0) * (_globalHeight/2.0 + y);
 
 			return v;
 		}
