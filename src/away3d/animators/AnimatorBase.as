@@ -346,10 +346,23 @@ package away3d.animators
 
 		public var _animationCallbacks:Vector.<Function> = new <Function>[];
 		public function animationCallback():void {
-			while(_animationCallbacks.length > 0) { _animationCallbacks.shift()() }
+			var cbs:Vector.<Function> = _animationCallbacks;
+			_animationCallbacks = new <Function>[];
+			while(cbs.length > 0) { cbs.shift()() }
 		}
 		public function addAnimationCallback(cb:Function):void {
 			_animationCallbacks.push(cb);
+		}
+		public function clearCallbacks():void {
+			var frame:uint;
+			for(frame in _eventFrameCbs) {
+				if(_eventFrameCbs[frame] && _eventFrameCbs[frame].length > 0) {
+					var cbs:Vector.<Function> = _eventFrameCbs[frame];
+					_eventFrameCbs[frame] = null;
+					do { cbs.shift()() } while(cbs.length > 0);
+				}
+			}
+			animationCallback();
 		}
 
 		// <<<<<<<<<<<
