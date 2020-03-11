@@ -226,7 +226,9 @@ package away3d.core.managers
 				((_color >> 16) & 0xff)/255.0,
 				((_color >> 8) & 0xff)/255.0,
 				(_color & 0xff)/255.0,
-				((_color >> 24) & 0xff)/255.0);
+				((_color >> 24) & 0xff)/255.0,
+				1.0,
+				stencilValue);
 			
 			_bufferClear = true;
 		}
@@ -447,6 +449,18 @@ package away3d.core.managers
 		{
 			_color = color;
 		}
+
+		// private var _alpha:Number = 1;
+
+		// public function get alpha():Number
+		// {
+		// 	return _alpha;
+		// }
+
+		// public function set alpha(value:Number):void
+		// {
+		// 	_alpha = value;
+		// }
 		
 		/**
 		 * The visibility of the Stage3D.
@@ -496,6 +510,8 @@ package away3d.core.managers
 		{
 			_touch3DManager = value;
 		}
+
+		public var stencilValue:int = 0;
 		
 		/**
 		 * Frees the Context3D associated with this Stage3DProxy.
